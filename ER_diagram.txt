@@ -1,0 +1,64 @@
+CustomUser
+-----
+UserID 
+email email(254)
+username varchar(150)
+first_name varchar(150)
+last_name varchar(150)
+password password(150)
+
+
+Tag
+-----
+TagID PK int
+name varchar(150)
+color varchar(7)
+slug varchar(50)
+
+
+Recipe
+-----
+RecipeID PK int
+tags FK >-< Tag.TagID
+author FK >- CustomUser.UserID
+ingredients FK >-< RecipeIngredient.RecipeIngredientID
+name varchar(150)
+image image_file
+text text
+cooking_time int(>=1)
+
+
+ShoppingList
+-----
+ShoppingListID PK int
+users FK >- CustomUser.UserID
+recipes FK >- Recipe.RecipeID
+
+
+FavoritesList
+-----
+FavoritesList PK int
+users FK >- CustomUser.UserID
+recipes FK >- Recipe.RecipeID
+
+
+Follow
+-----
+FollowID PK int
+user FK >- CustomUser.UserID
+author FK >- CustomUser.UserID
+
+
+Ingredient
+-----
+IngredientID PK int
+name varchar(150)
+measurement_unit varchar(10)
+
+
+RecipeIngredient
+-----
+RecipeIngredientID PK int
+recipe FK >- Recipe.RecipeID
+ingredient FK >- Ingredient.IngredientID
+amount int
