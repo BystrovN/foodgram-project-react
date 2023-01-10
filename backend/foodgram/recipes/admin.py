@@ -1,3 +1,51 @@
 from django.contrib import admin
+from django.db.models import Count
 
-# Register your models here.
+from .models import (
+    Ingredient,
+    Tag,
+    Recipe,
+    RecipeIngredient,
+    FavoriteList,
+    ShoppingList,
+)
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+
+
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('author', 'name',)
+    list_filter = ('author', 'name', 'tag')
+    inlines = (RecipeIngredientInline,)
+    readonly_fields = ('quantity_in_favorites',)
+
+    def quantity_in_favorites(self, obj):
+        """Возвращаем общее число добавлений рецепта в избранное."""
+        return obj.in_favorites
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(in_favorites=Count('favorites'))
+        return queryset
+
+
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'measurement_unit')
+    list_filter = ('name',)
+
+
+class FavoriteListAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe')
+
+
+class ShoppingListAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe')
+
+
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(Tag)
+admin.site.register(FavoriteList, FavoriteListAdmin)
+admin.site.register(ShoppingList, ShoppingListAdmin)
