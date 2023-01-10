@@ -8,8 +8,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from .serializers import GetTokenSerializer
+from . import serializers
 from .exceptions import PasswordFailedException
+from .mixins import ListCreateRetrieveModelMixin
 
 User = get_user_model()
 
@@ -20,7 +21,7 @@ class GetTokenView(APIView):
     """
 
     permission_classes = (AllowAny,)
-    serializer_class = GetTokenSerializer
+    serializer_class = serializers.GetTokenSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -48,3 +49,17 @@ def delete_token_view(request):
     token.delete()
 
     return Response(status=HTTPStatus.NO_CONTENT)
+
+
+class UserViewSet(ListCreateRetrieveModelMixin):
+    """
+    Представление для вывода списка и создания экземпляра пользователя.
+    """
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return serializers.UserListSerializer
+
+        return serializers.UserInstanceSerializer

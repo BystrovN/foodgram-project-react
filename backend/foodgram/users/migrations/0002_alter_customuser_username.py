@@ -2,7 +2,6 @@
 
 import django.contrib.auth.validators
 from django.db import migrations, models
-import users.validators
 
 
 class Migration(migrations.Migration):
@@ -20,7 +19,6 @@ class Migration(migrations.Migration):
                 unique=True,
                 validators=[
                     django.contrib.auth.validators.UnicodeUsernameValidator(),
-                    users.validators.validate_username,
                 ],
             ),
         ),
