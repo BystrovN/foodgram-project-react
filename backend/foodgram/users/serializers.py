@@ -5,6 +5,7 @@ from rest_framework import serializers
 from .utils import is_subscribed
 
 User = get_user_model()
+IS_SUBSCRIBED_KEY = 'is_subscribed'
 
 
 class GetTokenSerializer(serializers.Serializer):
@@ -29,11 +30,15 @@ class UserListSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
-            'is_subscribed',
+            IS_SUBSCRIBED_KEY,
         )
 
     def get_is_subscribed(self, obj):
-        return is_subscribed(self.context.get('request').user, obj)
+        request = self.context.get('request')
+        if request is None:
+            return False  # Если пользователь переходит на api/users/me/
+
+        return is_subscribed(request.user, obj)
 
 
 class UserInstanceSerializer(serializers.ModelSerializer):
@@ -42,9 +47,15 @@ class UserInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            'id',
             'email',
             'username',
             'first_name',
             'last_name',
             'password',
         )
+        read_only_fields = ('id',)
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)

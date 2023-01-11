@@ -1,4 +1,4 @@
-from http import HTTPStatus
+from rest_framework import status
 
 import pytest
 
@@ -9,11 +9,14 @@ class TestAuthorization:
     URL_LOGIN = '/api/auth/token/login/'
     URL_LOGOUT = '/api/auth/token/logout/'
 
-    def test_00_auth_urls_not_404(self, client):
+    def test_00_auth_urls_not_404(self, client, user_client):
         urls = [self.URL_LOGIN, self.URL_LOGOUT]
+
         for url in urls:
             response = client.get(url)
-            assert response.status_code != 404, f'Страница `{url}` не найдена'
+            assert (
+                response.status_code != status.HTTP_404_NOT_FOUND
+            ), f'Страница `{url}` не найдена'
 
     @pytest.mark.django_db(transaction=True)
     def test_01_invalid_data_get_token(self, client):
@@ -23,21 +26,21 @@ class TestAuthorization:
         response = client.post(self.URL_LOGIN, data=invalid_data)
 
         assert (
-            response.status_code != HTTPStatus.CREATED
+            response.status_code != status.HTTP_201_CREATED
         ), 'Выдан токен на невалидные данные'
 
         invalid_password = {'password': invalid_password, 'email': VALID_EMAIL}
         response = client.post(self.URL_LOGIN, data=invalid_password)
 
         assert (
-            response.status_code != HTTPStatus.CREATED
+            response.status_code != status.HTTP_201_CREATED
         ), 'Выдан токен на невалидный пароль'
 
         invalid_email = {'password': VALID_PASSWORD, 'email': invalid_email}
         response = client.post(self.URL_LOGIN, data=invalid_email)
 
         assert (
-            response.status_code != HTTPStatus.CREATED
+            response.status_code != status.HTTP_201_CREATED
         ), 'Выдан токен на невалидный email'
 
     @pytest.mark.django_db(transaction=True)
@@ -46,7 +49,7 @@ class TestAuthorization:
 
         response = client.post(self.URL_LOGIN, data=valid_data)
         assert (
-            response.status_code == HTTPStatus.CREATED
+            response.status_code == status.HTTP_201_CREATED
         ), 'Не выдан токен на валидные данные'
 
     @pytest.mark.django_db(transaction=True)
@@ -54,7 +57,7 @@ class TestAuthorization:
         response = user_client.post(self.URL_LOGOUT)
 
         assert (
-            response.status_code == HTTPStatus.NO_CONTENT
+            response.status_code == status.HTTP_204_NO_CONTENT
         ), 'Не удаляется токен у авторезированного пользователя'
 
     @pytest.mark.django_db(transaction=True)
@@ -62,5 +65,5 @@ class TestAuthorization:
         response = client.post(self.URL_LOGOUT)
 
         assert (
-            response.status_code == HTTPStatus.UNAUTHORIZED
+            response.status_code == status.HTTP_401_UNAUTHORIZED
         ), 'Неавторезированного пользователя допускает до удаления токена'
