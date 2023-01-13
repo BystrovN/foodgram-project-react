@@ -1,14 +1,16 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import GetTokenView, delete_token_view, UserViewSet, UserMeView
+from . import views
 
 router = DefaultRouter()
-router.register('', UserViewSet)
+router.register('', views.UserViewSet)
 
 urlpatterns = [
-    path('token/login/', GetTokenView.as_view()),
-    path('token/logout/', delete_token_view),
-    path('me/', UserMeView.as_view()),
+    path('token/login/', views.GetTokenView.as_view()),
+    path('token/logout/', views.delete_token_view),
+    path('me/', views.UserMeView.as_view()),
+    path('set_password/', views.SetPasswordView.as_view()),
+    path('subscriptions/', views.MySubscriptionsView.as_view()),
     path('', include(router.urls)),
 ]
