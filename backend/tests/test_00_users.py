@@ -5,14 +5,14 @@ from django.contrib.auth import get_user_model
 from users.models import Follow
 from users.serializers import IS_SUBSCRIBED_KEY
 
-from .conftest import VALID_EMAIL, VALID_PASSWORD, VALID_USERNAME, MAIN_USER_ID
+from .conftest import USER_EMAIL, USER_PASSWORD, NAME, MAIN_ID
 
 User = get_user_model()
 
 
 class TestUsers:
     URL_LIST_USERS = '/api/users/'
-    URL_VALID_INSTANCE_USER = '/api/users/1/'
+    URL_VALID_INSTANCE_USER = f'/api/users/{MAIN_ID}/'
     URL_INVALID_INSTANCE_USER = '/api/users/100/'
     URL_ME = '/api/users/me/'
     URL_SET_PASSWORD = '/api/users/set_password/'
@@ -91,10 +91,10 @@ class TestUsers:
 
     @pytest.mark.django_db(transaction=True)
     def test_04_is_subscribed(self, client, user_client, two_followers):
-        following_id = MAIN_USER_ID + 1
-        not_following_id = MAIN_USER_ID + 2
+        following_id = MAIN_ID + 1
+        not_following_id = MAIN_ID + 2
 
-        follower = User.objects.get(id=MAIN_USER_ID)
+        follower = User.objects.get(id=MAIN_ID)
         author = User.objects.get(id=following_id)
         follow = Follow.objects.create(user=follower, author=author)
 
@@ -141,13 +141,13 @@ class TestUsers:
         response_json = response.json()
 
         assert (
-            response_json.get('email') == VALID_EMAIL
+            response_json.get('email') == USER_EMAIL
         ), 'api/users/me возвращает некорректные данные '
 
     def test_06_set_password_auth(self, user_client):
         data = {
             'new_password': 'qwerty',
-            'current_password': VALID_PASSWORD,
+            'current_password': USER_PASSWORD,
         }
         response = user_client.post(self.URL_SET_PASSWORD, data=data)
 
@@ -159,18 +159,16 @@ class TestUsers:
         response = user_client.get(self.URL_LIST_USERS)
         response_json = response.json()
 
-        assert (
-            response_json.get('results')[0].get('username') == VALID_USERNAME
-        )
+        assert response_json.get('results')[0].get('username') == NAME
 
     def test_08_get_instant_user_content_check(self, user_client):
         response = user_client.get(self.URL_VALID_INSTANCE_USER)
         response_json = response.json()
 
-        assert response_json.get('username') == VALID_USERNAME
+        assert response_json.get('username') == NAME
 
     def test_09_subscribe(self, client, user_client, two_followers):
-        following_author_id = MAIN_USER_ID + 1
+        following_author_id = MAIN_ID + 1
         invalid_id = 100
 
         response = user_client.post(
@@ -190,7 +188,7 @@ class TestUsers:
         )
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        response = user_client.post(f'/api/users/{MAIN_USER_ID}/subscribe/')
+        response = user_client.post(f'/api/users/{MAIN_ID}/subscribe/')
         assert (
             response.status_code == status.HTTP_400_BAD_REQUEST
         ), 'API позволяет подписаться на себя самого, что запрещено'

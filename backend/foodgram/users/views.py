@@ -5,9 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.generics import ListAPIView
-from rest_framework.decorators import action
 
 from . import serializers
 from .exceptions import PasswordFailedException, SubscribeException
@@ -28,9 +27,9 @@ class UserViewSet(ListCreateRetrieveModelMixin):
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
-            return serializers.UserListSerializer
+            return serializers.UserSerializer
 
-        return serializers.UserInstanceSerializer
+        return serializers.UserCreateSerializer
 
     @action(
         methods=['post', 'delete'],
@@ -76,7 +75,7 @@ class MySubscriptionsView(ListAPIView):
 class UserMeView(APIView):
     """Представление для просмотра информации о себе."""
 
-    serializer_class = serializers.UserListSerializer
+    serializer_class = serializers.UserSerializer
 
     def get(self, request):
         user = get_object_or_404(User, id=request.user.id)

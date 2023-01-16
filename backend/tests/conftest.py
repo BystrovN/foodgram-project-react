@@ -2,21 +2,24 @@ import pytest
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-VALID_PASSWORD = '12345'
-VALID_EMAIL = 'testuser@gmail.com'
-VALID_USERNAME = 'TestUser'
-MAIN_USER_ID = 1
+from recipes.models import Tag, Ingredient
+
+USER_PASSWORD = '12345'
+USER_EMAIL = 'testuser@gmail.com'
+NAME = 'TestTestTest'
+MAIN_ID = 1
+NEW_OBJECTS_QUANTITY = 3
 
 
 @pytest.fixture
 def user(django_user_model):
     return django_user_model.objects.create_user(
-        username=VALID_USERNAME,
-        password=VALID_PASSWORD,
-        email=VALID_EMAIL,
+        username=NAME,
+        password=USER_PASSWORD,
+        email=USER_EMAIL,
         first_name='Test',
         last_name='User',
-        id=MAIN_USER_ID
+        id=MAIN_ID,
     )
 
 
@@ -38,7 +41,35 @@ def two_followers(django_user_model):
             password='12345678',
             first_name=f'Test{i}',
             last_name=f'Test{i}',
-            id=MAIN_USER_ID + 1 + i
+            id=MAIN_ID + 1 + i,
         )
-        for i in range(2)
+        for i in range(NEW_OBJECTS_QUANTITY)
+    )
+
+
+@pytest.fixture
+def tag():
+    return Tag.objects.create(
+        name=NAME,
+        color='color16',
+        slug='TestSlug',
+        id=MAIN_ID,
+    )
+
+
+@pytest.fixture
+def ingredients():
+    Ingredient.objects.create(name=NAME, measurement_unit='г', id=MAIN_ID)
+
+    Ingredient.objects.bulk_create(
+        Ingredient(
+            name=f'XIngTest{i}X', measurement_unit='г', id=MAIN_ID + 1 + i
+        )
+        for i in range(NEW_OBJECTS_QUANTITY)
+    )
+
+    Ingredient.objects.create(
+        name='Search',
+        measurement_unit='г',
+        id=NEW_OBJECTS_QUANTITY + MAIN_ID + 1,
     )

@@ -135,4 +135,4 @@ dmypy.json
 
 
 backend/foodgram/media/
-*.vscode
+backend.vscode

@@ -17,7 +17,7 @@ class GetTokenSerializer(serializers.Serializer):
     )
 
 
-class UserListSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер просмотра списка пользователей."""
 
     is_subscribed = serializers.SerializerMethodField()
@@ -41,8 +41,8 @@ class UserListSerializer(serializers.ModelSerializer):
         return is_subscribed(request.user, obj.id)
 
 
-class UserInstanceSerializer(serializers.ModelSerializer):
-    """Сериалайзер экземпляра пользователя."""
+class UserCreateSerializer(serializers.ModelSerializer):
+    """Сериалайзер создания экземпляра пользователя."""
 
     class Meta:
         model = User
@@ -88,7 +88,7 @@ class RecipesSubscriptionsSerializer(serializers.ModelSerializer):
         )
 
 
-class MySubscriptionsSerializer(UserListSerializer):
+class MySubscriptionsSerializer(UserSerializer):
     """Сериалайзер для просмотра собственных подписок пользователя."""
 
     recipes = serializers.SerializerMethodField()
@@ -111,6 +111,6 @@ class MySubscriptionsSerializer(UserListSerializer):
         return recipes_count(obj)
 
     def get_recipes(self, obj):
-        results = get_limit_recipes(self, obj)
+        qs = get_limit_recipes(self, obj)
 
-        return RecipesSubscriptionsSerializer(results, many=True).data
+        return RecipesSubscriptionsSerializer(qs, many=True).data

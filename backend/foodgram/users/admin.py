@@ -5,11 +5,11 @@ from .models import CustomUser, Follow
 
 
 class CustomUserAdmin(UserAdmin):
-    list_filter = ('email', 'username')
+    list_filter = ('id', 'email', 'username')
 
 
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ('user', 'author')
+    list_display = ('id', 'user', 'author')
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

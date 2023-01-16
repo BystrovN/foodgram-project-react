@@ -16,8 +16,8 @@ class RecipeIngredientInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name',)
-    list_filter = ('author', 'name', 'tag')
+    list_display = ('id', 'author', 'name',)
+    list_filter = ('author', 'name', 'tags')
     inlines = (RecipeIngredientInline,)
     readonly_fields = ('quantity_in_favorites',)
 
@@ -32,16 +32,16 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'measurement_unit')
+    list_display = ('id', 'name', 'measurement_unit')
     list_filter = ('name',)
 
 
 class FavoriteListAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe')
+    list_display = ('id', 'user', 'recipe')
 
 
 class ShoppingListAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe')
+    list_display = ('id', 'user', 'recipe')
 
 
 admin.site.register(Recipe, RecipeAdmin)

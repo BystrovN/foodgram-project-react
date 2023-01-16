@@ -1,8 +1,7 @@
 from rest_framework import status
-
 import pytest
 
-from .conftest import VALID_EMAIL, VALID_PASSWORD
+from .conftest import USER_EMAIL, USER_PASSWORD
 
 
 class TestAuthorization:
@@ -29,14 +28,14 @@ class TestAuthorization:
             response.status_code != status.HTTP_201_CREATED
         ), 'Выдан токен на невалидные данные'
 
-        invalid_password = {'password': invalid_password, 'email': VALID_EMAIL}
+        invalid_password = {'password': invalid_password, 'email': USER_EMAIL}
         response = client.post(self.URL_LOGIN, data=invalid_password)
 
         assert (
             response.status_code != status.HTTP_201_CREATED
         ), 'Выдан токен на невалидный пароль'
 
-        invalid_email = {'password': VALID_PASSWORD, 'email': invalid_email}
+        invalid_email = {'password': USER_PASSWORD, 'email': invalid_email}
         response = client.post(self.URL_LOGIN, data=invalid_email)
 
         assert (
@@ -45,7 +44,7 @@ class TestAuthorization:
 
     @pytest.mark.django_db(transaction=True)
     def test_02_valid_data_get_token(self, client, user):
-        valid_data = {'password': VALID_PASSWORD, 'email': VALID_EMAIL}
+        valid_data = {'password': USER_PASSWORD, 'email': USER_EMAIL}
 
         response = client.post(self.URL_LOGIN, data=valid_data)
         assert (

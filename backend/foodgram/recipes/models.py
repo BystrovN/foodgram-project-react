@@ -9,8 +9,8 @@ MIN_AMOUNT: int = 0.01
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=150, unique=True, db_index=True)
-    measurement_unit = models.CharField(max_length=10)
+    name = models.CharField(max_length=200, unique=True, db_index=True)
+    measurement_unit = models.CharField(max_length=200)
 
     class Meta:
         verbose_name = 'ингридиент'
@@ -23,15 +23,14 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=150,
+        max_length=200,
         unique=True,
         validators=(validate_lowercase,),
     )
     color = models.CharField(max_length=7, unique=True)
     slug = models.SlugField(
-        max_length=50,
+        max_length=200,
         unique=True,
-        validators=(validate_lowercase,),
     )
 
     class Meta:
@@ -48,8 +47,10 @@ class Recipe(models.Model):
     name = models.CharField(max_length=150)
     image = models.ImageField(upload_to='recipes/')
     text = models.TextField()
-    ingredient = models.ManyToManyField(Ingredient, through='RecipeIngredient')
-    tag = models.ManyToManyField(Tag)
+    ingredients = models.ManyToManyField(
+        Ingredient, through='RecipeIngredient'
+    )
+    tags = models.ManyToManyField(Tag)
     cooking_time = models.SmallIntegerField(
         validators=(
             MinValueValidator(
@@ -72,7 +73,7 @@ class Recipe(models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.FloatField(
+    amount = models.SmallIntegerField(
         validators=(
             MinValueValidator(
                 MIN_AMOUNT, 'Количество ингридиентов должно быть больше нуля.'
@@ -81,9 +82,16 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
+        default_related_name = 'recipe_ingredient'
         verbose_name = 'ингридиент к рецепту'
         verbose_name_plural = 'ингридиенты к рецепту'
         ordering = ('recipe',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_ingredient',
+            )
+        ]
 
     def __str__(self):
         return f'{self.recipe} -> {self.ingredient}'
