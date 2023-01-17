@@ -5,7 +5,6 @@ from django.core.validators import MinValueValidator
 from .validators import validate_lowercase
 
 User = get_user_model()
-MIN_AMOUNT: int = 0.01
 
 
 class Ingredient(models.Model):
@@ -76,7 +75,7 @@ class RecipeIngredient(models.Model):
     amount = models.SmallIntegerField(
         validators=(
             MinValueValidator(
-                MIN_AMOUNT, 'Количество ингридиентов должно быть больше нуля.'
+                1, 'Количество ингридиента должно быть больше единицы.'
             ),
         )
     )

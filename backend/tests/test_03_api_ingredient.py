@@ -10,7 +10,7 @@ class TestIngredients:
     URL_INVALID_INGREDIENT = '/api/ingredients/100/'
 
     @pytest.mark.django_db(transaction=True)
-    def test_00_get_ingredients(self, client, ingredients):
+    def test_00_get_ingredients(self, client, five_ingredients):
         urls_status = {
             self.URL_INGREDIENTS: status.HTTP_200_OK,
             self.URL_VALID_INGREDIENT: status.HTTP_200_OK,
@@ -24,7 +24,7 @@ class TestIngredients:
             ), f'Ошибка в статусе {url}, пользователь неавторизован'
 
     @pytest.mark.django_db(transaction=True)
-    def test_01_get_ingredient_content_check(self, client, ingredients):
+    def test_01_get_ingredient_content_check(self, client, five_ingredients):
         response = client.get(self.URL_VALID_INGREDIENT)
         response_json = response.json()
 
@@ -33,7 +33,7 @@ class TestIngredients:
         ), f'{self.URL_VALID_TAG} возвращает некорректные данные '
 
     @pytest.mark.django_db(transaction=True)
-    def test_02_ingredient_search_check(self, client, ingredients):
+    def test_02_ingredient_search_check(self, client, five_ingredients):
         response = client.get(f'{self.URL_INGREDIENTS}?search=test')
         response_json = response.json()
 

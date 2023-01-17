@@ -1,14 +1,18 @@
-def is_favorited(user, recipe_id):
+def is_favorited(request, recipe_id):
     """Проверяем добавлен ли рецепт у пользователя в избранное."""
+    if not request:
+        return False
     return (
-        user.is_authenticated
-        and user.favorites.filter(recipe_id=recipe_id).exists()
+        request.user.is_authenticated
+        and request.user.favorites.filter(recipe_id=recipe_id).exists()
     )
 
 
-def is_in_shopping_cart(user, recipe_id):
+def is_in_shopping_cart(request, recipe_id):
     """Проверяем добавлен ли рецепт у пользователя в корзину."""
+    if not request:
+        return False
     return (
-        user.is_authenticated
-        and user.shopping.filter(recipe_id=recipe_id).exists()
+        request.user.is_authenticated
+        and request.user.shopping.filter(recipe_id=recipe_id).exists()
     )

@@ -59,7 +59,6 @@ class RecipesViewSet(ModelViewSet):
     """Представление для модели Recipe."""
 
     queryset = Recipe.objects.all()
-    serializer_class = serializers.RecipeSerializer
     permission_classes = (AuthorOrAdminOrReadOnly,)
     pagination_class = CustomPageNumberPagination
     filter_backends = (DjangoFilterBackend,)
@@ -74,3 +73,9 @@ class RecipesViewSet(ModelViewSet):
         "options",
         "trace",
     ]
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return serializers.RecipeSerializer
+
+        return serializers.CreateRecipeSerializer
