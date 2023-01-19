@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 
 from users.models import Follow
 from users.serializers import IS_SUBSCRIBED_KEY
-
 from .conftest import USER_EMAIL, USER_PASSWORD, NAME, MAIN_ID
 
 User = get_user_model()

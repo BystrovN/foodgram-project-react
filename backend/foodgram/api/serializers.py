@@ -1,7 +1,6 @@
 import base64
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 

@@ -1,11 +1,14 @@
+import csv
+
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 
@@ -15,8 +18,16 @@ from users.serializers import ShortRecipesSerializer
 from . import serializers
 from .permissions import AuthorOrAdminOrReadOnly
 from .filters import RecipeFilter
-from .utils import is_favorited, is_in_shopping_cart
-from .exceptions import FavoriteException, ShoppingCartException
+from .utils import (
+    is_favorited,
+    is_in_shopping_cart,
+    get_ingredients_from_shopping_cart,
+)
+from .exceptions import (
+    FavoriteException,
+    ShoppingCartException,
+    EmptyShoppingCart,
+)
 
 User = get_user_model()
 
@@ -121,7 +132,7 @@ class RecipesViewSet(ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
 
         if is_in_shopping_cart(request, recipe.id):
-            raise FavoriteException(f'Рецепт {recipe} уже в корзине')
+            raise ShoppingCartException(f'Рецепт {recipe} уже в корзине')
 
         return self._create(request.user, recipe, ShoppingList)
 
@@ -133,3 +144,24 @@ class RecipesViewSet(ModelViewSet):
             raise ShoppingCartException(f'Рецепт {recipe} не в корзине')
 
         return self._delete(request.user, recipe, ShoppingList)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        ingredients = get_ingredients_from_shopping_cart(request.user)
+
+        if not ingredients:
+            raise EmptyShoppingCart
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename="foodgram.csv"'
+            },
+        )
+        writer = csv.writer(response)
+        writer.writerow(['Ingredient', 'Measurement unit', 'Amount'])
+
+        for ingredient in ingredients:
+            writer.writerow(ingredient)
+
+        return response

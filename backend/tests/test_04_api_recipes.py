@@ -2,6 +2,7 @@ from rest_framework import status
 import pytest
 
 from recipes.models import Recipe
+from api.serializers import FAVORITED_KEY, SHOPPING_CART_KEY
 from .conftest import MAIN_ID, IMAGE, NAME
 
 
@@ -102,7 +103,7 @@ class TestRecipes:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_03_recipe(self, client, recipe):
+    def test_03_recipe_unauth(self, client, recipe):
         allowed_urls_statuses = {
             self.URL_RECIPES: status.HTTP_200_OK,
             self.URL_VALID_RECIPE: status.HTTP_200_OK,
@@ -131,3 +132,29 @@ class TestRecipes:
         response = client.get(f'{self.URL_RECIPES}?author=2')
         response_json = response.json().get('results')
         assert len(response_json) == 0
+
+    def test_06_recipe_in_favorite(
+        self, user_client, second_user_client, fav_recipe
+    ):
+        client_keys = {
+            user_client: True,
+            second_user_client: False
+        }
+
+        for client, key in client_keys.items():
+            response = client.get(self.URL_VALID_RECIPE)
+            response_json = response.json()
+            assert response_json.get(FAVORITED_KEY) is key
+
+    def test_07_recipe_in_shopping_cart(
+        self, user_client, second_user_client, shop_recipe
+    ):
+        client_keys = {
+            user_client: True,
+            second_user_client: False
+        }
+
+        for client, key in client_keys.items():
+            response = client.get(self.URL_VALID_RECIPE)
+            response_json = response.json()
+            assert response_json.get(SHOPPING_CART_KEY) is key
