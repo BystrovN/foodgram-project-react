@@ -73,9 +73,9 @@ class SetPasswordViewSerializer(serializers.Serializer):
     )
 
 
-class RecipesSubscriptionsSerializer(serializers.ModelSerializer):
+class ShortRecipesSerializer(serializers.ModelSerializer):
     """
-    Сериалайзер для использования в качестве поля MySubscriptionsSerializer.
+    Сериалайзер для краткой репрезентации рецепта
     """
 
     class Meta:
@@ -113,4 +113,4 @@ class MySubscriptionsSerializer(UserSerializer):
     def get_recipes(self, obj):
         qs = get_limit_recipes(self, obj)
 
-        return RecipesSubscriptionsSerializer(qs, many=True).data
+        return ShortRecipesSerializer(qs, many=True).data

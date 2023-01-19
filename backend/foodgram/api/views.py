@@ -1,15 +1,22 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, FavoriteList, ShoppingList
 from users.paginations import CustomPageNumberPagination
+from users.serializers import ShortRecipesSerializer
 from . import serializers
 from .permissions import AuthorOrAdminOrReadOnly
 from .filters import RecipeFilter
+from .utils import is_favorited, is_in_shopping_cart
+from .exceptions import FavoriteException, ShoppingCartException
 
 User = get_user_model()
 
@@ -79,3 +86,50 @@ class RecipesViewSet(ModelViewSet):
             return serializers.RecipeSerializer
 
         return serializers.CreateRecipeSerializer
+
+    def _create(self, user, recipe, model):
+        obj = model.objects.create(user=user, recipe=recipe)
+        obj.save()
+        serializer = ShortRecipesSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _delete(self, user, recipe, model):
+        obj = get_object_or_404(model, user=user, recipe=recipe)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['post'], detail=True)
+    def favorite(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+
+        if is_favorited(request, recipe.id):
+            raise FavoriteException(f'Рецепт {recipe} уже в избранном')
+
+        return self._create(request.user, recipe, FavoriteList)
+
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+
+        if not is_favorited(request, recipe.id):
+            raise FavoriteException(f'Рецепт {recipe} не в избранном')
+
+        return self._delete(request.user, recipe, FavoriteList)
+
+    @action(methods=['post'], detail=True)
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+
+        if is_in_shopping_cart(request, recipe.id):
+            raise FavoriteException(f'Рецепт {recipe} уже в корзине')
+
+        return self._create(request.user, recipe, ShoppingList)
+
+    @shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+
+        if not is_in_shopping_cart(request, recipe.id):
+            raise ShoppingCartException(f'Рецепт {recipe} не в корзине')
+
+        return self._delete(request.user, recipe, ShoppingList)

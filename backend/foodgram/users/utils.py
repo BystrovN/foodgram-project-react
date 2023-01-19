@@ -19,9 +19,11 @@ def get_limit_recipes(serializer_instance, user):
     Получаем queryset модели Recipe с учетом лимита - recipes_limit,
     переданного пользователем в параметрах запроса.
     """
-    limit = serializer_instance.context.get('request').query_params.get(
-        'recipes_limit'
-    )
+    request = serializer_instance.context.get('request')
+    if request is None:
+        return user.recipes.all()
+
+    limit = request.query_params.get('recipes_limit')
     if limit:
         return user.recipes.all()[: int(limit)]
 

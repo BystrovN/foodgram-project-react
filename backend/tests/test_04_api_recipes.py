@@ -1,6 +1,7 @@
 from rest_framework import status
 import pytest
 
+from recipes.models import Recipe
 from .conftest import MAIN_ID, IMAGE, NAME
 
 
@@ -63,11 +64,18 @@ class TestRecipes:
             },
         }
 
+        recipe = Recipe.objects.filter(
+            name=self.VALID_DATA['name'], text=self.VALID_DATA['text']
+        )
+        assert recipe.exists() is False
+
         for stat, data in statuses_data.items():
             response = user_client.post(
                 self.URL_RECIPES, data=data, format='json'
             )
             assert response.status_code == stat
+
+        assert recipe.exists() is True
 
         del statuses_data[status.HTTP_201_CREATED]
         statuses_data[status.HTTP_200_OK] = self.VALID_DATA
@@ -109,7 +117,7 @@ class TestRecipes:
         responses = (
             client.post(self.URL_RECIPES),
             client.patch(self.URL_VALID_RECIPE),
-            client.delete(self.URL_VALID_RECIPE)
+            client.delete(self.URL_VALID_RECIPE),
         )
         for response in responses:
             assert response.status_code == status.HTTP_401_UNAUTHORIZED

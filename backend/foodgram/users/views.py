@@ -32,27 +32,30 @@ class UserViewSet(ListCreateRetrieveModelMixin):
         return serializers.UserCreateSerializer
 
     @action(
-        methods=['post', 'delete'],
+        methods=['post'],
         detail=True,
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, pk):
-        pk = int(pk)
         author = get_object_or_404(User, id=pk)
 
-        if request.method == 'POST':
-            if request.user.id == pk:
-                raise SubscribeException('Подписка на самого себя запрещена.')
+        if request.user == author:
+            raise SubscribeException('Подписка на самого себя запрещена.')
 
-            if is_subscribed(request.user, pk):
-                raise SubscribeException('Подписка уже оформлена.')
+        if is_subscribed(request.user, author.id):
+            raise SubscribeException('Подписка уже оформлена.')
 
-            follow = Follow.objects.create(user=request.user, author=author)
-            follow.save()
-            return Response(status=status.HTTP_201_CREATED)
+        follow = Follow.objects.create(user=request.user, author=author)
+        follow.save()
+        serializer = serializers.MySubscriptionsSerializer(author)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, pk):
+        author = get_object_or_404(User, id=pk)
 
         if not is_subscribed(request.user, pk):
-            raise SubscribeException('Подписка не оформлена.')
+            raise SubscribeException(f'Подписка на {author} не оформлена.')
 
         follow = get_object_or_404(Follow, user=request.user, author=author)
         follow.delete()

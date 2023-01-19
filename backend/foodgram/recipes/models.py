@@ -8,13 +8,19 @@ User = get_user_model()
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=200, unique=True, db_index=True)
+    name = models.CharField(max_length=200, db_index=True)
     measurement_unit = models.CharField(max_length=200)
 
     class Meta:
         verbose_name = 'ингридиент'
         verbose_name_plural = 'ингридиенты'
         ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient_unit',
+            )
+        ]
 
     def __str__(self):
         return self.name

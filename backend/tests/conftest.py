@@ -2,7 +2,7 @@ import pytest
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, FavoriteList, ShoppingList
 
 USER_PASSWORD = '12345'
 USER_EMAIL = 'testuser@gmail.com'
@@ -121,3 +121,13 @@ def recipe(user):
         cooking_time=1,
         id=MAIN_ID,
     )
+
+
+@pytest.fixture
+def fav_recipe(user, recipe):
+    return FavoriteList.objects.create(user=user, recipe=recipe, id=MAIN_ID)
+
+
+@pytest.fixture
+def shop_recipe(user, recipe):
+    return ShoppingList.objects.create(user=user, recipe=recipe, id=MAIN_ID)

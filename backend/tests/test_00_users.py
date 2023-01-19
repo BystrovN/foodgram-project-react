@@ -63,7 +63,8 @@ class TestUsers:
             'id': 1,
         }
 
-        assert User.objects.filter(username=username).exists() is False
+        instance = User.objects.filter(username=username)
+        assert instance.exists() is False
 
         response = client.post(self.URL_LIST_USERS, data=data)
 
@@ -71,7 +72,7 @@ class TestUsers:
             response.status_code == status.HTTP_201_CREATED
         ), 'Пользователь с валидными данными не создается'
         assert (
-            User.objects.filter(username=username).exists() is True
+            instance.exists() is True
         ), 'Пользователь с валидными данными не создается'
 
     @pytest.mark.django_db(transaction=True)
