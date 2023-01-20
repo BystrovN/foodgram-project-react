@@ -83,13 +83,13 @@ class RecipesViewSet(ModelViewSet):
     filterset_class = RecipeFilter
 
     http_method_names = [
-        "get",
-        "post",
-        "patch",
-        "delete",
-        "head",
-        "options",
-        "trace",
+        'get',
+        'post',
+        'patch',
+        'delete',
+        'head',
+        'options',
+        'trace',
     ]
 
     def get_serializer_class(self):

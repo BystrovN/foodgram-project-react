@@ -1,9 +1,16 @@
-from rest_framework import status
+import shutil
+import tempfile
+
 import pytest
+from django.conf import settings
+from rest_framework import status
 
 from recipes.models import Recipe
 from api.serializers import FAVORITED_KEY, SHOPPING_CART_KEY
 from .conftest import MAIN_ID, IMAGE, NAME
+
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
 class TestRecipes:
@@ -30,6 +37,8 @@ class TestRecipes:
         second_tag,
         five_ingredients,
     ):
+        settings.MEDIA_ROOT = TEMP_MEDIA_ROOT
+
         statuses_data = {
             status.HTTP_201_CREATED: self.VALID_DATA,
             status.HTTP_400_BAD_REQUEST: {
@@ -85,6 +94,8 @@ class TestRecipes:
                 self.URL_VALID_RECIPE, data=data, format='json'
             )
             assert response.status_code == stat
+
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     @pytest.mark.django_db(transaction=True)
     def test_01_delete_recipe(self, user_client, second_user_client, recipe):

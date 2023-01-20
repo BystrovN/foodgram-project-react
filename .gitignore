@@ -136,3 +136,6 @@ dmypy.json
 
 backend/foodgram/media/
 backend.vscode
+
+ER_diagram.txt
+*/dump.json

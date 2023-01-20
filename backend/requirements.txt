@@ -5,3 +5,5 @@ pytest==7.2.0
 pytest_django==4.5.2
 pytest_pythonpath==0.7.4
 django-filter==22.1
+psycopg2-binary==2.9.5
+python-dotenv==0.21.0

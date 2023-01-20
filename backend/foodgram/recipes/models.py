@@ -50,7 +50,7 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
-    image = models.ImageField(upload_to='recipes/')
+    image = models.ImageField(upload_to='recipes/', max_length=300)
     text = models.TextField()
     ingredients = models.ManyToManyField(
         Ingredient, through='RecipeIngredient'
