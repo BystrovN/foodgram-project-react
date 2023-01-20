@@ -20,11 +20,11 @@ def get_limit_recipes(serializer_instance, user):
     переданного пользователем в параметрах запроса.
     """
     request = serializer_instance.context.get('request')
-    if request is None:
+    if not request:
         return user.recipes.all()
 
     limit = request.query_params.get('recipes_limit')
     if limit:
-        return user.recipes.all()[: int(limit)]
+        return user.recipes.all()[:int(limit)]
 
     return user.recipes.all()

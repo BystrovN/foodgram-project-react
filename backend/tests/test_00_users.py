@@ -101,39 +101,39 @@ class TestUsers:
         response = user_client.get(f'/api/users/{not_following_id}/')
         response_json = response.json()
         assert (
-            response_json.get(IS_SUBSCRIBED_KEY) is False
+            response_json[IS_SUBSCRIBED_KEY] is False
         ), 'API возвращает is_subscribed = True на неподписанного пользователя'
 
         response = user_client.get(f'/api/users/{following_id}/')
         response_json = response.json()
         assert (
-            response_json.get(IS_SUBSCRIBED_KEY) is True
+            response_json[IS_SUBSCRIBED_KEY] is True
         ), 'API возвращает is_subscribed = False на подписанного пользователя'
 
         response = user_client.get(self.URL_SUBSCRIPTIONS)
         response_json = response.json()
         assert (
-            response_json.get('results')[0].get('username') == 'Test0'
+            response_json['results'][0]['username'] == 'Test0'
         ), 'Ответ {self.URL_SUBSCRIPTIONS} не корректный'
 
         follow.delete()
         response = user_client.get(f'/api/users/{following_id}/')
         response_json = response.json()
         assert (
-            response_json.get(IS_SUBSCRIBED_KEY) is False
+            response_json[IS_SUBSCRIBED_KEY] is False
         ), 'API возвращает is_subscribed = True на неподписанного пользователя'
 
         response = client.get(f'/api/users/{following_id}/')
         response_json = response.json()
         assert (
-            response_json.get(IS_SUBSCRIBED_KEY) is False
+            response_json[IS_SUBSCRIBED_KEY] is False
         ), 'API возвращает is_subscribed = True на неавторизованного'
 
         response = user_client.get(self.URL_SUBSCRIPTIONS)
         response_json = response.json()
 
         assert (
-            len(response_json.get('results')) == 0
+            len(response_json['results']) == 0
         ), 'Ответ {self.URL_SUBSCRIPTIONS} не корректный. Список не пустой'
 
     def test_05_get_me_auth(self, user_client):
@@ -141,7 +141,7 @@ class TestUsers:
         response_json = response.json()
 
         assert (
-            response_json.get('email') == USER_EMAIL
+            response_json['email'] == USER_EMAIL
         ), 'api/users/me возвращает некорректные данные '
 
     def test_06_set_password_auth(self, user_client):
@@ -159,13 +159,13 @@ class TestUsers:
         response = user_client.get(self.URL_LIST_USERS)
         response_json = response.json()
 
-        assert response_json.get('results')[0].get('username') == NAME
+        assert response_json['results'][0]['username'] == NAME
 
     def test_08_get_instant_user_content_check(self, user_client):
         response = user_client.get(self.URL_VALID_INSTANCE_USER)
         response_json = response.json()
 
-        assert response_json.get('username') == NAME
+        assert response_json['username'] == NAME
 
     def test_09_subscribe(self, client, user_client, two_followers):
         following_author_id = MAIN_ID + 1

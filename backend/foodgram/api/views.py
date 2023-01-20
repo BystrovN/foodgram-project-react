@@ -1,5 +1,3 @@
-import csv
-
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -14,7 +12,6 @@ from rest_framework.decorators import action
 
 from recipes.models import Tag, Ingredient, Recipe, FavoriteList, ShoppingList
 from users.paginations import CustomPageNumberPagination
-from users.serializers import ShortRecipesSerializer
 from . import serializers
 from .permissions import AuthorOrAdminOrReadOnly
 from .filters import RecipeFilter
@@ -67,10 +64,10 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
                 Q(name__icontains=search_name),
             )
         )
-        qs = [i for i in qs_contains if i not in qs_startswith]
-        qs = qs_startswith + qs
+        queryset = [i for i in qs_contains if i not in qs_startswith]
+        queryset = qs_startswith + queryset
 
-        return qs
+        return queryset
 
 
 class RecipesViewSet(ModelViewSet):
@@ -101,7 +98,7 @@ class RecipesViewSet(ModelViewSet):
     def _create(self, user, recipe, model):
         obj = model.objects.create(user=user, recipe=recipe)
         obj.save()
-        serializer = ShortRecipesSerializer(recipe)
+        serializer = serializers.ShortRecipesSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def _delete(self, user, recipe, model):
@@ -147,21 +144,18 @@ class RecipesViewSet(ModelViewSet):
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        ingredients = get_ingredients_from_shopping_cart(request.user)
+        name = 0
+        measure = 1
+        amount = 2
 
+        ingredients = get_ingredients_from_shopping_cart(request.user)
         if not ingredients:
             raise EmptyShoppingCart
 
-        response = HttpResponse(
-            content_type='text/csv',
-            headers={
-                'Content-Disposition': 'attachment; filename="foodgram.csv"'
-            },
-        )
-        writer = csv.writer(response)
-        writer.writerow(['Ingredient', 'Measurement unit', 'Amount'])
-
-        for ingredient in ingredients:
-            writer.writerow(ingredient)
+        cart = ''
+        ingredients = [*ingredients]
+        for ing in ingredients:
+            cart += f'{ing[name]} ({ing[measure]}) - {ing[amount]} \n'
+        response = HttpResponse(cart, content_type='text/plain')
 
         return response

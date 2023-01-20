@@ -6,7 +6,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
-from rest_framework.generics import ListAPIView
 
 from . import serializers
 from .exceptions import PasswordFailedException, SubscribeException
@@ -47,7 +46,9 @@ class UserViewSet(ListCreateRetrieveModelMixin):
 
         follow = Follow.objects.create(user=request.user, author=author)
         follow.save()
-        serializer = serializers.MySubscriptionsSerializer(author)
+        serializer = serializers.MySubscriptionsSerializer(
+            author, context={'request': request}
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -61,28 +62,43 @@ class UserViewSet(ListCreateRetrieveModelMixin):
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class MySubscriptionsView(ListAPIView):
-    """Представление для просмотра собственных подписок пользователя."""
-
-    serializer_class = serializers.MySubscriptionsSerializer
-    pagination_class = CustomPageNumberPagination
-    queryset = User.objects.all()
-
-    def get_queryset(self):
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscriptions(self, request):
         user = get_object_or_404(User, id=self.request.user.id)
         followings_id = user.follower.values_list('author_id', flat=True)
-        return User.objects.filter(id__in=(followings_id))
+        followings = User.objects.filter(id__in=followings_id)
 
+        page = self.paginate_queryset(followings)
+        if page is not None:
+            serializer = serializers.MySubscriptionsSerializer(
+                page, many=True, context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
 
-class UserMeView(APIView):
-    """Представление для просмотра информации о себе."""
+        serializer = serializers.MySubscriptionsSerializer(
+            followings, many=True, context={'request': request}
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+            context={'request': request},
+        )
 
-    serializer_class = serializers.UserSerializer
-
-    def get(self, request):
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request):
         user = get_object_or_404(User, id=request.user.id)
-        serializer = self.serializer_class(user)
+        serializer = serializers.UserSerializer(
+            user, context={'request': request}
+        )
+
         return Response(serializer.data)
 
 
@@ -103,7 +119,7 @@ class GetTokenView(APIView):
         if user.check_password(serializer.validated_data.get('password')):
             token, _ = Token.objects.get_or_create(user=user)
             return Response(
-                data={'token': token.key}, status=status.HTTP_201_CREATED
+                data={'auth_token': token.key}, status=status.HTTP_201_CREATED
             )
 
         raise PasswordFailedException

@@ -50,13 +50,13 @@ class Tag(models.Model):
 class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
-    image = models.ImageField(upload_to='recipes/', max_length=300)
+    image = models.ImageField(upload_to='recipes/images/', max_length=300)
     text = models.TextField()
     ingredients = models.ManyToManyField(
         Ingredient, through='RecipeIngredient'
     )
     tags = models.ManyToManyField(Tag)
-    cooking_time = models.SmallIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=(
             MinValueValidator(
                 1, 'Время приготовления не может быть меньше одной минуты.'

@@ -3,6 +3,7 @@ import base64
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.db import transaction
 
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from users.serializers import UserSerializer
@@ -155,11 +156,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'image',
         )
         for field in required_fields:
-            try:
-                attrs[field]
-            except KeyError:
+            if not attrs.get(field):
                 raise ValidationError(f'Не передано обязательное поле {field}')
 
+    @transaction.atomic
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -172,6 +172,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name')
         instance.image = validated_data.get('image')
@@ -204,3 +205,18 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, value):
         return RecipeSerializer(value).data
+
+
+class ShortRecipesSerializer(serializers.ModelSerializer):
+    """
+    Сериалайзер для краткой репрезентации рецепта
+    """
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )

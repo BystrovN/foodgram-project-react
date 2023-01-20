@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if request is None:  # Если пользователь переходит на api/users/me/
+        if not request:
             return False
 
         return is_subscribed(request.user, obj.id)
@@ -78,6 +78,8 @@ class ShortRecipesSerializer(serializers.ModelSerializer):
     Сериалайзер для краткой репрезентации рецепта
     """
 
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = (
@@ -86,6 +88,11 @@ class ShortRecipesSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        photo_url = obj.image.url
+        return request.build_absolute_uri(photo_url)
 
 
 class MySubscriptionsSerializer(UserSerializer):
@@ -113,4 +120,6 @@ class MySubscriptionsSerializer(UserSerializer):
     def get_recipes(self, obj):
         qs = get_limit_recipes(self, obj)
 
-        return ShortRecipesSerializer(qs, many=True).data
+        return ShortRecipesSerializer(
+            qs, many=True, context={"request": self.context.get('request')}
+        ).data
