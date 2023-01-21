@@ -134,8 +134,8 @@ dmypy.json
 .idea
 
 
-*/media/
-*/.vscode/
+media/
+.vscode/
 
 ER_diagram.txt
 */dump.json
