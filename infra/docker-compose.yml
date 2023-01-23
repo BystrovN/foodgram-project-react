@@ -9,22 +9,23 @@ services:
       - ./.env
 
   web:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: cocksteady/foodgram_back:latest
     restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
+    env_file:
+      - ./.env
+    command: >
+       sh -c 'python manage.py migrate &&
+              python manage.py collectstatic --no-input &&
+              python manage.py csv_ingredients_import &&
+              gunicorn --bind 0:8000 foodgram.wsgi'
     depends_on:
       - db
-    env_file:
-      - ./.env 
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: cocksteady/foodgram_front:v1
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:

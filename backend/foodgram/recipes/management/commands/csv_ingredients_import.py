@@ -23,6 +23,7 @@ class Command(BaseCommand):
                         Ingredient.objects.create(
                             name=column[0], measurement_unit=column[1]
                         )
+            print('Import ingredient completed')
 
         except FileNotFoundError:
             raise FileNotFoundError(
