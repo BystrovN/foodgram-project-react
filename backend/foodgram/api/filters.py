@@ -1,6 +1,7 @@
 from django_filters import rest_framework
 
-from recipes.models import Recipe, Tag, FavoriteList, ShoppingList
+from recipes.models import FavoriteList, Recipe, ShoppingList, Tag
+
 from .serializers import FAVORITED_KEY, SHOPPING_CART_KEY
 
 

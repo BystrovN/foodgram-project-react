@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 
 from recipes.models import Ingredient
 
-DATA_DIR = f'{settings.BASE_DIR.parent.parent}/data/'
+DATA_DIR = f'{settings.BASE_DIR}/data/'
 FILE_NAME = 'ingredients.csv'
 
 

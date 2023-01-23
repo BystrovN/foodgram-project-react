@@ -1,32 +1,23 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from recipes.models import Tag, Ingredient, Recipe, FavoriteList, ShoppingList
+from recipes.models import FavoriteList, Ingredient, Recipe, ShoppingList, Tag
 from users.paginations import CustomPageNumberPagination
-from . import serializers
-from .permissions import AuthorOrAdminOrReadOnly
-from .filters import RecipeFilter
-from .utils import (
-    is_favorited,
-    is_in_shopping_cart,
-    get_ingredients_from_shopping_cart,
-)
-from .exceptions import (
-    FavoriteException,
-    ShoppingCartException,
-    EmptyShoppingCart,
-)
 
-User = get_user_model()
+from . import serializers
+from .exceptions import (EmptyShoppingCart, FavoriteException,
+                         ShoppingCartException)
+from .filters import RecipeFilter
+from .permissions import AuthorOrAdminOrReadOnly
+from .utils import (get_ingredients_from_shopping_cart, is_favorited,
+                    is_in_shopping_cart)
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -65,9 +56,8 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
             )
         )
         queryset = [i for i in qs_contains if i not in qs_startswith]
-        queryset = qs_startswith + queryset
 
-        return queryset
+        return qs_startswith + queryset
 
 
 class RecipesViewSet(ModelViewSet):
@@ -156,6 +146,5 @@ class RecipesViewSet(ModelViewSet):
         ingredients = [*ingredients]
         for ing in ingredients:
             cart += f'{ing[name]} ({ing[measure]}) - {ing[amount]} \n'
-        response = HttpResponse(cart, content_type='text/plain')
 
-        return response
+        return HttpResponse(cart, content_type='text/plain')

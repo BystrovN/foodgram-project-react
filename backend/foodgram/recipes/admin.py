@@ -1,14 +1,8 @@
 from django.contrib import admin
 from django.db.models import Count
 
-from .models import (
-    Ingredient,
-    Tag,
-    Recipe,
-    RecipeIngredient,
-    FavoriteList,
-    ShoppingList,
-)
+from .models import (FavoriteList, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingList, Tag)
 
 
 class RecipeIngredientInline(admin.TabularInline):
@@ -31,8 +25,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        queryset = queryset.annotate(in_favorites=Count('favorites'))
-        return queryset
+        return queryset.annotate(in_favorites=Count('favorites'))
 
 
 class IngredientAdmin(admin.ModelAdmin):

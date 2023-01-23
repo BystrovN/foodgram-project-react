@@ -1,12 +1,13 @@
 import base64
 
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.serializers import UserSerializer
+
 from .utils import is_favorited, is_in_shopping_cart
 
 FAVORITED_KEY = 'is_favorited'
@@ -136,7 +137,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('author',)
 
-    def _add_ingredients(seld, ingredients, recipe):
+    def _add_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             ingredient_instance = ingredient.get('id')
             amount = ingredient.get('amount')

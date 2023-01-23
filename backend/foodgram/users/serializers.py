@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .utils import is_subscribed, recipes_count, get_limit_recipes
 from recipes.models import Recipe
+
+from .utils import get_limit_recipes, is_subscribed, recipes_count
 
 User = get_user_model()
 IS_SUBSCRIBED_KEY = 'is_subscribed'
