@@ -10,7 +10,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import FavoriteList, Ingredient, Recipe, ShoppingList, Tag
 from users.paginations import CustomPageNumberPagination
-
 from . import serializers
 from .exceptions import (EmptyShoppingCart, FavoriteException,
                          ShoppingCartException)

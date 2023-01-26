@@ -7,7 +7,6 @@ from rest_framework.exceptions import ValidationError
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.serializers import UserSerializer
-
 from .utils import is_favorited, is_in_shopping_cart
 
 FAVORITED_KEY = 'is_favorited'
