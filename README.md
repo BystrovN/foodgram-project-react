@@ -3,9 +3,6 @@
 
 ![foodgram CI/CD](https://github.com/BystrovN/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
 
-### IP сервера - http://158.160.47.18/
-###  Админ - логин: admin; пароль - admin
-
 # Welcome!
 
   
