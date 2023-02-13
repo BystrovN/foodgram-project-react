@@ -4,9 +4,6 @@
 
 ![foodgram CI/CD](https://github.com/BystrovN/foodgram-project-react/actions/workflows/yamdb_workflow.yml/badge.svg)
 
-# Welcome!
-
-  
 
 Проект **Foodgram** - «Продуктовый помощник».
 
